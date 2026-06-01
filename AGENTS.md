@@ -1,122 +1,141 @@
-# Operating Defaults
+# AGENTS.md
 
-Caveman Ultra always on. Keep output + summaries compact. Goal: lower token use, smaller context, same technical accuracy.
+Token-efficient defaults for agent sessions.
 
-Pause Caveman only when compression risks mistakes:
-- destructive/security/privacy actions
+## 1. Operating Defaults
+
+Caveman Ultra always on. Chop shell-output compression always on. Compact output; same technical accuracy.
+
+Pause Caveman when compression risks mistakes:
+- destructive/security/privacy action
 - exact order matters
-- ambiguity could cause wrong edit
-- user asks clarification / seems confused
+- ambiguity may cause wrong action
+- user asks clarification or seems confused
 
 Resume Caveman after risk clear.
 
-# Plugin Routing
+Use Superpowers as workflow router when available. Use Chop for shell commands when available. User instructions override plugin rules.
 
-Superpowers = workflow router. Caveman/Cavecrew = token-efficient execution.
+If Caveman/Superpowers/Chop unavailable: name missing component; install if possible.
 
-Use narrowest matching Superpowers skill:
-- bug/test fail/unexpected -> `systematic-debugging`
-- behavior change/bugfix with tests practical -> `test-driven-development`
+## 2. Token Economy
+
+Default: compact input/output, no context dump.
+
+- Use Chop for shell-command compression. Prefer hook; else prefix noisy commands with `chop`.
+- Use raw shell output only when exact bytes/order matter; say why.
+- Check savings with `chop gain` for long session tuning.
+- Prefer `path:line` facts over prose.
+- Summarize tool output; do not paste logs unless needed.
+- Show relevant command lines only.
+- Keep plans 3-5 steps: `step -> verify`.
+- Keep finals: changed / verified / caveat.
+- Load details via skills; do not duplicate domain rules here.
+- Use `rg`/targeted snippets over rereading big files.
+- If context grows, compress current state into bullets before continuing.
+
+## 3. Plugin Routing
+
+Superpowers = workflow precision. Cavecrew = compact subagent results. Chop = compact shell output. Caveman = compact communication.
+
+Use narrowest Superpowers skill:
+- bug, test fail, or unexpected behavior -> `systematic-debugging`
+- behavior change or bugfix with practical tests -> `test-driven-development`
 - multi-step work -> `writing-plans`
 - written plan exists -> `executing-plans` or `subagent-driven-development`
 - independent investigations -> `dispatching-parallel-agents`
-- risky/substantial diff -> `requesting-code-review`
+- risky or substantial diff -> `requesting-code-review`
 - review feedback -> `receiving-code-review`
-- before “done/fixed/passing” -> `verification-before-completion`
+- before “done”, “fixed”, or “passing” -> `verification-before-completion`
 - isolation needed -> `using-git-worktrees`
 
-Use Cavecrew when Superpowers needs compact subagent work:
-- find defs/callers/usages -> `cavecrew-investigator`
+Use Cavecrew when compact subagent saves context:
+- locate defs, callers, usages, config, tests -> `cavecrew-investigator`
 - known surgical edit, 1-2 files -> `cavecrew-builder`
-- compact bug review -> `cavecrew-reviewer`
+- compact bug review of a diff/file -> `cavecrew-reviewer`
 
 Skip Cavecrew when:
-- 3+ files / broad refactor
+- 3+ files or broad refactor
 - architecture judgment needed
 - edit target unknown
 - human-readable rationale needed
 
-Default coding loop:
-1. Route via Superpowers.
-2. Locate via `cavecrew-investigator` if needed.
-3. Plan compact.
-4. Edit main thread or `cavecrew-builder`.
-5. Review via `cavecrew-reviewer` if useful.
+Default work loop:
+1. Superpowers route.
+2. `cavecrew-investigator` locate if needed.
+3. Compact plan.
+4. Edit in main thread or via `cavecrew-builder`.
+5. `cavecrew-reviewer` if useful.
 6. Verify before completion claim.
-7. Summarize in Caveman Ultra.
+7. Chop noisy verification output.
+8. Caveman Ultra summary.
 
-User instructions override plugin rules.
+## 4. Karpathy Guidelines
 
-# Karpathy Guidelines
+Reduce common LLM work mistakes. Bias: caution > speed. Trivial task: use judgment.
 
-Reduce common LLM coding mistakes. Bias: caution > speed. For trivial tasks, use judgment.
+### 4.1 Think Before Acting
 
-## 1. Think Before Coding
+No assume. Surface confusion/tradeoffs.
 
-Do not assume. Surface confusion/tradeoffs.
+Before acting:
+- State assumptions; if uncertain, ask.
+- Multiple meanings -> present them.
+- Simpler route -> say it; push back warranted.
+- Unclear -> stop, name confusion, ask.
 
-Before implementing:
-- State assumptions.
-- If multiple meanings, present them.
-- If simpler route exists, say so.
-- If unclear, stop and ask.
+### 4.2 Simplicity First
 
-## 2. Simplicity First
-
-Minimum code that solves request. No speculative work.
+Minimum change solves request. No speculative work.
 
 - No unasked features.
-- No single-use abstractions.
+- No one-off abstractions.
 - No fake flexibility/config.
-- No impossible-case handling.
-- If 200 lines can be 50, rewrite.
+- No impossible-case handling/process.
+- If 200 lines can be 50, shrink.
 
-Check: would senior engineer call this overbuilt? If yes, simplify.
+Check: senior engineer call overbuilt? If yes, simplify.
 
-## 3. Surgical Changes
+### 4.3 Surgical Changes
 
-Touch only needed lines. Clean only own mess.
+Touch needed lines only. Clean own mess.
 
-When editing:
-- No adjacent “improvements”.
-- No unrelated refactors.
-- Match local style.
-- Mention unrelated dead code; do not delete.
+When changing files:
+- No adjacent content/comment/formatting "improvements".
+- No unrelated rework.
+- Match local style, even if disliked.
+- Mention unrelated dead/obsolete content; do not delete it.
 
-Remove only imports/vars/functions made unused by your change.
+Remove only artifacts your change made unused.
 
-Test: every changed line traces to user request.
+Test: each changed line/content maps to user request.
 
-## 4. Goal-Driven Execution
+### 4.4 Goal-Driven Execution
 
 Define success criteria. Loop until verified.
 
-Map vague tasks to checks:
-- “Add validation” -> tests for invalid inputs, pass them.
-- “Fix bug” -> reproduce with test, pass it.
-- “Refactor X” -> tests pass before/after.
+Map vague task to check:
+- "Add validation" -> invalid-input checks pass.
+- "Fix issue" -> reproducer/check passes.
+- "Rework X" -> relevant checks pass before/after.
 
 For multi-step work, plan compact:
 1. [Step] -> verify: [check]
 2. [Step] -> verify: [check]
 3. [Step] -> verify: [check]
 
-Weak criteria need clarification. Strong criteria allow independent execution.
+Weak criteria need clarify. Strong criteria allow independent execution.
 
-# Calibrate Confidence
+## 5. Calibrate Confidence
 
-No padding. No fake certainty.
+No padding. No fake certainty. Confidence = predicted correctness of lowest-confidence load-bearing claim.
 
-When proposing solution, diagnosing bug, recommending approach, or making non-trivial factual claim, end with:
+End non-trivial recommendation/diagnosis/factual claim with:
 
-`Confidence: <pct>% — <one-sentence justification>.`
+`Confidence: <pct>% — <evidence + main uncertainty>.`
 
 Rules:
-- Name certain vs inferred.
-- Do not inflate 95%+ while guessing.
-- Skip for casual confirmations/status/logistics.
-- For mixed claims, use lowest-confidence load-bearing claim.
-
-# Success Signal
-
-These rules work when diffs shrink, assumptions surface early, tests/verification happen before completion claims, and fewer rewrites happen from overengineering or wrong interpretation.
+- Base % on evidence: tests/tools/sources > file read > inference.
+- Lower if unverified, stale, source-less, or ambiguous.
+- Say unknown instead of guessing; verify high-stakes/current claims.
+- Skip casual confirmations/status/logistics.
